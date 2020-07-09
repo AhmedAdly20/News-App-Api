@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UsersResource;
 use App\Http\Resources\UserResource;
+use App\Http\Resources\AuthorPostsResource;
+use App\Http\Resources\AuthorCommentsResource;
 use App\User;
 
 class UserController extends Controller
@@ -17,7 +19,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::paginate();
+        $users = User::paginate(env('AUTHORS_PER_PAGE'));
         return new UsersResource($users);
     }
 
@@ -64,5 +66,17 @@ class UserController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function posts($id){
+        $user = User::find($id);
+        $posts = $user->posts()->paginate(env('POSTS_PER_PAGE'));
+        return new AuthorPostsResource($posts);
+    }
+
+    public function comments($id){
+        $user = User::find($id);
+        $comments = $user->comments()->paginate(env('COMMENTS_PER_PAGE'));
+        return new AuthorCommentsResource($comments);
     }
 }
