@@ -20,7 +20,7 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts = Post::paginate( env('POSTS_PER_PAGE') );
+        $posts = Post::with(['comments' , 'author' , 'category'])->paginate( env('POSTS_PER_PAGE') );
         return new PostsResource( $posts );
     }
 
@@ -82,7 +82,7 @@ class PostController extends Controller
      */
     public function show($id)
     {
-        $post = Post::find( $id );
+        $post = Post::with( ['comments' , 'author' , 'category'] )->where( 'id' , $id )->get();
         return new PostResource( $post );
     }
 

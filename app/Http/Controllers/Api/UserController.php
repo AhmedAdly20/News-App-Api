@@ -71,9 +71,21 @@ class UserController extends Controller
         if( $request->has('name') ){
             $user->name = $request->get('name');
         }
-        if( $request->has('avatar') ){
-            $user->avatar = $request->get('avatar');
+
+        function uploadImage($folder, $image)
+        {
+            $image->store('/', $folder);
+            $filename = $image->hashName();
+            $path = url('/'). '/'. $folder . '/' . $filename;
+            return $path;
         }
+
+        $filePath = "";
+        if ($request->has('avatar')) {
+            $filePath = uploadImage('images', $request->avatar);
+        }
+        $user->avatar = $filePath;
+
         $user->save();
         return new UserResource( $user );
     }
