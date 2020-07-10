@@ -10,6 +10,7 @@ use App\Http\Resources\TokenResource;
 use App\Http\Resources\AuthorPostsResource;
 use App\Http\Resources\AuthorCommentsResource;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use App\User;
 
 class UserController extends Controller
@@ -33,7 +34,17 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name'  => 'required',
+            'email' => 'required',
+            'password'  => 'required'
+        ]);
+        $user = new User();
+        $user->name = $request->get('name');
+        $user->email = $request->get('email');
+        $user->password = Hash::make($request->get('password') );
+        $user->save();
+        return new UserResource($user);
     }
 
     /**
