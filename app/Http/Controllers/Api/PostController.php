@@ -9,6 +9,7 @@ use App\Http\Resources\PostResource;
 use App\Http\Resources\PostsResource;
 use App\Http\Resources\CommentsResource;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
@@ -48,11 +49,25 @@ class PostController extends Controller
         }
         $post->user_id = $user->id;
 
-        // TODO: Handle featured_image File Upload
         $post->votes_up = 0;
         $post->votes_down = 0;
 
         $post->date_written = Carbon::now()->format('Y-m-d H:i:s');
+
+        function uploadImage($folder, $image)
+        {
+            $image->store('/', $folder);
+            $filename = $image->hashName();
+            $path = url('/'). '/'. $folder . '/' . $filename;
+            return $path;
+        }
+
+        $filePath = "";
+        if ($request->has('featured_image')) {
+            $filePath = uploadImage('images', $request->featured_image);
+        }
+
+        $post->featured_image = $filePath;
 
         $post->save();
 
@@ -80,7 +95,40 @@ class PostController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $user = $request->user();
+        $post = Post::find( $id );
+
+        if( $request->has('title') ){
+            $post->title = $request->get( 'title' );
+        }
+
+        if( $request->has( 'content' ) ){
+            $post->content = $request->get( 'content' );
+        }
+
+        if( $request->has('category_id') ){
+            if( intval( $request->get( 'category_id' ) ) != 0 ){
+                $post->category_id = intval( $request->get( 'category_id' ) );
+            }
+        }
+
+        function uploadImage($folder, $image)
+        {
+            $image->store('/', $folder);
+            $filename = $image->hashName();
+            $path = url('/'). '/'. $folder . '/' . $filename;
+            return $path;
+        }
+
+        $filePath = "";
+        if ($request->has('featured_image')) {
+            $filePath = uploadImage('images', $request->featured_image);
+        }
+        $post->featured_image = $filePath;
+
+        $post->save();
+
+        return new PostResource( $post );
     }
 
     /**
