@@ -6,8 +6,10 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UsersResource;
 use App\Http\Resources\UserResource;
+use App\Http\Resources\TokenResource;
 use App\Http\Resources\AuthorPostsResource;
 use App\Http\Resources\AuthorCommentsResource;
+use Illuminate\Support\Facades\Auth;
 use App\User;
 
 class UserController extends Controller
@@ -78,5 +80,18 @@ class UserController extends Controller
         $user = User::find($id);
         $comments = $user->comments()->paginate(env('COMMENTS_PER_PAGE'));
         return new AuthorCommentsResource($comments);
+    }
+
+    public function getToken( Request $request ){
+        $request->validate( [
+            'email' => 'required',
+            'password'  => 'required'
+        ] );
+        $credentials = $request->only('email','password');
+        if( Auth::attempt( $credentials ) ){
+            $user = User::where('email',$request->get('email'))->first();
+            return new TokenResource([ 'token' => $user->api_token]);
+        }
+        return 'not found';
     }
 }
